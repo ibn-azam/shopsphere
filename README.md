@@ -20,6 +20,56 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Authentication (Firebase)
+
+ShopSphere uses the Firebase JS SDK for email/password and Google sign-in. User
+state is provided to the whole app by `AuthProvider` in `src/context/AuthContext.jsx`,
+and the navbar reflects the signed-in user.
+
+### 1. Create a Firebase project
+
+1. Open the [Firebase console](https://console.firebase.google.com/) and create a project.
+2. Add a **Web app** in Project settings → General → Your apps.
+3. Copy the SDK config values.
+
+### 2. Configure environment variables
+
+Copy the example file and fill in your values:
+
+```bash
+cp .env.local.example .env.local
+```
+
+```dotenv
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=...
+```
+
+Restart the dev server after changing env values.
+
+### 3. Enable sign-in methods
+
+In the Firebase console go to **Authentication → Sign-in method** and enable:
+
+- **Email/Password** (required)
+- **Google** (optional)
+
+For Google, also add your site to **Authentication → Settings → Authorized
+domains** (for local development, `localhost` is allowed by default).
+
+### 4. Use it
+
+- `/signup` — create an account with email/password or Google
+- `/login` — sign in and get redirected to `/`
+- The navbar shows the signed-in user and a **Sign out** action
+
+If the environment variables are missing, the auth pages render a clear
+"Firebase is not configured" notice instead of crashing.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

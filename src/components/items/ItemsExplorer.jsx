@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { LuSearch, LuSearchX, LuX } from "react-icons/lu";
+import Link from "next/link";
+import { LuPlus, LuSearch, LuSearchX, LuX } from "react-icons/lu";
 import ItemCard from "./ItemCard";
 import { categories, items } from "@/data/items";
 
@@ -228,6 +229,27 @@ export default function ItemsExplorer() {
                 Clear filters
               </button>
             )}
+          </div>
+        </div>
+
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-[#6B7280]">
+            {filteredItems.length} {filteredItems.length === 1 ? "result" : "results"}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/items/add"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#FF6B35] px-4 py-2 text-sm font-medium text-[#FAFAFA] transition-colors hover:bg-[#e85d2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2"
+            >
+              <LuPlus className="h-4 w-4" aria-hidden="true" />
+              Add Items
+            </Link>
+            <Link
+              href="/manage-products"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#6B7280]/20 px-4 py-2 text-sm font-medium text-[#131B3A] transition-colors hover:border-[#FF6B35] hover:text-[#FF6B35] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2"
+            >
+              Manage Products
+            </Link>
           </div>
         </div>
 
