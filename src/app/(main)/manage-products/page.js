@@ -1,3 +1,4 @@
+import AuthGuard from "@/components/auth/AuthGuard";
 import ManageProductsView from "@/components/products/ManageProductsView";
 
 export const metadata = {

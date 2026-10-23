@@ -10,9 +10,11 @@ import {
 } from "react";
 import {
   createUserWithEmailAndPassword,
+  getRedirectResult,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile,
 } from "firebase/auth";
@@ -34,7 +36,7 @@ const AUTH_ERROR_MESSAGES = {
   "auth/operation-not-allowed":
     "This sign-in method is disabled in your Firebase project. Enable it under Authentication > Sign-in method.",
   "auth/popup-blocked":
-    "Your browser blocked the Google sign-in popup. Allow popups for this site and try again.",
+    "Your browser blocked the Google sign-in popup. Trying redirect instead...",
   "auth/popup-closed-by-user":
     "The Google sign-in window closed before finishing. Please try again.",
   "auth/cancelled-popup-request": "Another sign-in attempt is already in progress.",
@@ -82,6 +84,16 @@ export function AuthProvider({ children }) {
 
     if (!auth) return undefined;
 
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user);
+        }
+      })
+      .catch((authError) => {
+        setError(getAuthErrorMessage(authError));
+      });
+
     const unsubscribe = onAuthStateChanged(
       auth,
       (nextUser) => {
@@ -128,8 +140,22 @@ export function AuthProvider({ children }) {
   const loginWithGoogle = useCallback(async () => {
     const auth = requireAuth();
     setError("");
-    const credential = await signInWithPopup(auth, getGoogleAuthProvider());
-    return credential.user;
+
+    try {
+      const credential = await signInWithPopup(auth, getGoogleAuthProvider());
+      return credential.user;
+    } catch (err) {
+      if (
+        err?.code === "auth/popup-blocked" ||
+        err?.code === "auth/popup-closed-by-user" ||
+        err?.code === "auth/cancelled-popup-request" ||
+        err?.code === "auth/operation-not-supported-in-this-environment"
+      ) {
+        await signInWithRedirect(auth, getGoogleAuthProvider());
+        return null;
+      }
+      throw err;
+    }
   }, []);
 
   const logout = useCallback(async () => {

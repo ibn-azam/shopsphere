@@ -245,7 +245,7 @@ export default function ItemsExplorer() {
               Add Items
             </Link>
             <Link
-              href="/manage-products"
+              href="/items/manage"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#6B7280]/20 px-4 py-2 text-sm font-medium text-[#131B3A] transition-colors hover:border-[#FF6B35] hover:text-[#FF6B35] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2"
             >
               Manage Products

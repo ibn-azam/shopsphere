@@ -9,6 +9,7 @@ import {
   LuPlus,
   LuSearch,
   LuTrash2,
+  LuX,
 } from "react-icons/lu";
 import { Button } from "@heroui/react";
 import { items as baseItems } from "@/data/items";
@@ -44,6 +45,7 @@ export default function ManageProductsView() {
   const [customProducts, setCustomProducts] = useState([]);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -71,11 +73,31 @@ export default function ManageProductsView() {
       const matchesQuery =
         term.length === 0 ||
         product.title.toLowerCase().includes(term) ||
-        product.description.toLowerCase().includes(term);
+        (product.description || "").toLowerCase().includes(term);
 
       return matchesCategory && matchesQuery;
     });
   }, [allProducts, query, categoryFilter]);
+
+  const confirmDelete = () => {
+    if (!productToDelete) return;
+    const updated = customProducts.filter(
+      (product) => product.id !== productToDelete.id,
+    );
+    setCustomProducts(updated);
+
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // Ignore storage failures.
+    } finally {
+      setProductToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setProductToDelete(null);
+  };
 
   const removeProduct = (id) => {
     const updated = customProducts.filter((product) => product.id !== id);
@@ -114,7 +136,7 @@ export default function ManageProductsView() {
             </Link>
             <Link
               href="/items"
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-medium text-[#6B7280] transition-colors hover:bg-white hover:text-[#FF6B35] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-2 self-start rounded text-sm font-medium text-[#6B7280] transition-colors hover:text-[#FF6B35] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 sm:self-auto"
             >
               <LuArrowLeft className="h-4 w-4" aria-hidden="true" />
               Back to catalog
@@ -263,7 +285,7 @@ export default function ManageProductsView() {
                               {isCustom ? (
                                 <button
                                   type="button"
-                                  onClick={() => removeProduct(product.id)}
+                                  onClick={() => setProductToDelete(product)}
                                   className="inline-flex min-h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                                 >
                                   <LuTrash2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -331,7 +353,7 @@ export default function ManageProductsView() {
                             {isCustom ? (
                               <button
                                 type="button"
-                                onClick={() => removeProduct(product.id)}
+                                onClick={() => setProductToDelete(product)}
                                 className="inline-flex min-h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                               >
                                 <LuTrash2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -353,6 +375,58 @@ export default function ManageProductsView() {
           </>
         )}
       </div>
+
+      {productToDelete ? (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-[#131B3A]/40 px-4 py-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+        >
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl shadow-[#131B3A]/10">
+            <div className="flex items-start justify-between gap-4 p-6">
+              <div>
+                <h2
+                  id="delete-modal-title"
+                  className="text-lg font-semibold text-[#131B3A]"
+                >
+                  Delete product
+                </h2>
+                <p className="mt-1 text-sm text-[#6B7280]">
+                  Are you sure you want to delete{" "}
+                  <span className="font-medium text-[#131B3A]">
+                    {productToDelete.title}
+                  </span>
+                  ? This action cannot be undone.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={cancelDelete}
+                className="rounded-lg p-1.5 text-[#6B7280] transition-colors hover:bg-[#FAFAFA] hover:text-[#131B3A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35]"
+                aria-label="Close delete dialog"
+              >
+                <LuX className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="flex flex-col gap-2 border-t border-[#6B7280]/10 px-6 py-4 sm:flex-row sm:justify-end">
+              <Button
+                onPress={cancelDelete}
+                className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#6B7280]/20 bg-white font-medium text-[#131B3A] transition-colors hover:bg-[#FAFAFA]"
+              >
+                Cancel
+              </Button>
+              <Button
+                onPress={confirmDelete}
+                className="inline-flex min-h-10 items-center justify-center rounded-lg bg-red-600 font-medium text-white transition-colors hover:bg-red-700"
+              >
+                <LuTrash2 className="h-4 w-4" aria-hidden="true" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
